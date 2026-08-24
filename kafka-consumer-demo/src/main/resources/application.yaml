@@ -16,7 +16,7 @@ spring:
      # batch-size: 32768
       enable-auto-commit: false
       auto-commit-interval: 5
-      auto-offset-reset: latest
+      auto-offset-reset: earliest
 
       properties:
         spring.json.value.default.type: com.myapp.kafka.domain.Order
@@ -27,7 +27,7 @@ spring:
 
     listener:
       type: batch
-      ack-mode: batch
+      ack-mode: manual_immediate
 
 
 server:
