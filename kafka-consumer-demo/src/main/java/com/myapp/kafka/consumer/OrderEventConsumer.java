@@ -27,7 +27,7 @@ public class OrderEventConsumer {
         var count = invocation.incrementAndGet();
         try {
             System.out.printf("%s | invocation =%d | thread=%s | batchSize=%d%n",
-                    LocalDateTime.now(),count,Thread.currentThread().getName());
+                    LocalDateTime.now(),count,Thread.currentThread().getName(),orders.size());
 
             orders.forEach(order ->
                     logger.info("Order Details => key={}, partition={} offset={} order={} ",

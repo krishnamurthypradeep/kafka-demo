@@ -19,8 +19,9 @@ public class AppConfig {
 
        var factory = new ConcurrentKafkaListenerContainerFactory<Integer,Order>();
        factory.setConsumerFactory(consumerFactory);
-      // factory.setBatchListener(true);
-       //factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+       factory.setBatchListener(true);
+      // factory.getContainerProperties().setAckMode();
+       factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
        return factory;
     }
 }
