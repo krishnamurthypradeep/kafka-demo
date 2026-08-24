@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "partitions":[{
+        "topic":"products-prices-replication",
+        "partition":0,
+        "replicas":[1,2,3]
+    },
+{
+        "topic":"products-prices-replication",
+        "partition":1,
+        "replicas":[3,2]
+    }
+]
+}

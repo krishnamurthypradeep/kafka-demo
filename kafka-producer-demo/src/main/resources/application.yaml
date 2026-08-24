@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: kafka-producer-demo
+  kafka:
+    bootstrap-servers:
+      - localhost:19092
+      - localhost:19093
+      - localhost:19094
+    template:
+      default-topic: orders-topic
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.IntegerSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      client-id: spring-boot-producer
+      acks: all
+      retries: 10
+      properties:
+        retry.backof.ms: 1000
+
+      batch-size: 32768
+app:
+  kafka:
+    topic:
+      orders: orders-topic
+      partitions: 6
+      replicas: 3
+
+server:
+  port: 8888
