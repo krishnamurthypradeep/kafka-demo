@@ -15,7 +15,7 @@ spring:
 
      # batch-size: 32768
       enable-auto-commit: false
-      auto-commit-interval: 5
+      # auto-commit-interval: 5
       auto-offset-reset: earliest
 
       properties:
