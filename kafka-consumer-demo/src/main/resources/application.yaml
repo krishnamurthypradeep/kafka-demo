@@ -27,7 +27,7 @@ spring:
 
     listener:
       type: batch
-      ack-mode: manual_immediate
+      ack-mode: manual
 
 
 server:

@@ -1,0 +1,59 @@
+[
+  {
+    "orderId": 101,
+    "locationId": "BENGALURU",
+    "finalAmount": 1250.50,
+    "orderType": "GENERAL",
+    "orderLineItems": [
+      {
+        "item": "Laptop Bag",
+        "count": 1,
+        "amount": 750.50
+      },
+      {
+        "item": "Wireless Mouse",
+        "count": 2,
+        "amount": 250.00
+      }
+    ],
+    "orderedDateTime": "2026-08-24T18:30:00"
+  },
+  {
+    "orderId": 102,
+    "locationId": "MYSURU",
+    "finalAmount": 850.00,
+    "orderType": "RESTAURANT",
+    "orderLineItems": [
+      {
+        "item": "Veg Biryani",
+        "count": 2,
+        "amount": 300.00
+      },
+      {
+        "item": "Fresh Lime Soda",
+        "count": 2,
+        "amount": 125.00
+      }
+    ],
+    "orderedDateTime": "2026-08-24T18:31:00"
+  },
+  {
+    "orderId": 103,
+    "locationId": "CHENNAI",
+    "finalAmount": 2100.75,
+    "orderType": "GENERAL",
+    "orderLineItems": [
+      {
+        "item": "Mechanical Keyboard",
+        "count": 1,
+        "amount": 1600.75
+      },
+      {
+        "item": "USB-C Cable",
+        "count": 2,
+        "amount": 250.00
+      }
+    ],
+    "orderedDateTime": "2026-08-24T18:32:00"
+  }
+]
