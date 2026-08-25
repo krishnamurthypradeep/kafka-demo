@@ -17,13 +17,19 @@ spring:
       enable-auto-commit: false
 
       auto-offset-reset: earliest
+      fetch-min-size: 100KB
+      fetch-max-wait: 5000
+      session-timeout-ms: 10000
+      max-partition-fetch-bytes: 1MB
 
       properties:
         spring.json.value.default.type: com.myapp.kafka.domain.Order
         spring.json.trusted.packages: com.myapp.kafka.domain
         spring.json.type.headers: false
         partition.assignment.strategy: org.apache.kafka.clients.consumer.RangeAssignor
+
       group-id: manual-commit-v1
+      max-poll-records: 10
 
 
     listener:
