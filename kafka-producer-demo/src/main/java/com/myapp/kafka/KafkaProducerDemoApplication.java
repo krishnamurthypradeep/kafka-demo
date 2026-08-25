@@ -21,7 +21,7 @@ public class KafkaProducerDemoApplication {
 		SpringApplication.run(KafkaProducerDemoApplication.class, args);
 	}
 
-	@Bean
+	//@Bean
 	CommandLineRunner runner(OrderEventProducer producer){
 		return args -> {
 			List<Order> list=List.of(new Order(1002,"B12200",

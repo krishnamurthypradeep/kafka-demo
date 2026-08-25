@@ -15,14 +15,14 @@ spring:
 
      # batch-size: 32768
       enable-auto-commit: false
-      # auto-commit-interval: 5
+
       auto-offset-reset: earliest
 
       properties:
         spring.json.value.default.type: com.myapp.kafka.domain.Order
         spring.json.trusted.packages: com.myapp.kafka.domain
         spring.json.type.headers: false
-      group-id: order-batch-group
+      group-id: manual-commit-v1
 
 
     listener:
@@ -31,4 +31,7 @@ spring:
 
 
 server:
-  port: 8889
+  port: 0
+logging:
+  level:
+    org.apache.kafka.clients.consumer.ConsumerConfig: INFO
