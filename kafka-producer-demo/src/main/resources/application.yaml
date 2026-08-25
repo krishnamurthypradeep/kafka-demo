@@ -22,7 +22,7 @@ app:
   kafka:
     topic:
       orders: orders-topic
-      partitions: 6
+      partitions: 3
       replicas: 3
 
 server:

@@ -25,4 +25,9 @@ public class AppConfig {
         return TopicBuilder.name(topicName).partitions(partitions).replicas(replicas).build();
     }
 
+    @Bean
+    NewTopic paymentsTopic(){
+        return TopicBuilder.name("payments").partitions(3).replicas(3).build();
+    }
+
 }

@@ -20,19 +20,24 @@ public class OrderEventConsumer {
     private static final Logger logger = LoggerFactory.getLogger(OrderEventConsumer.class);
     private final AtomicInteger invocation = new AtomicInteger();
     @KafkaListener(
-    topics = "orders-topic",
+    topics = {"orders-topic","payments"},
     containerFactory = "processKafkaListenerFactory")
     public void processOrders(List<ConsumerRecord<Integer,Order>> orders,
                               Acknowledgment acknowledgment){
         var count = invocation.incrementAndGet();
         try {
             System.out.printf("%s | invocation =%d | thread=%s | batchSize=%d%n",
-                    LocalDateTime.now(),count,Thread.currentThread().getName(),orders.size());
+                    LocalDateTime.now(), count, Thread.currentThread().getName(), orders.size());
 
-            orders.forEach(order ->
-                    logger.info("Order Details => key={}, partition={} offset={} order={} ",
-                            order.key(),order.partition(),order.offset(),order.value()));
-       acknowledgment.acknowledge();
+            for (int index = 0; index < orders.size(); index++) {
+
+                logger.info("Order Details => {} ", orders.get(index).value());
+
+//            orders.forEach(order ->
+//                    logger.info("Order Details => key={}, partition={} offset={} order={} ",
+//                            order.key(),order.partition(),order.offset(),order.value()));
+            acknowledgment.acknowledge(index);
+        }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

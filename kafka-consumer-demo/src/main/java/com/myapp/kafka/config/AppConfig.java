@@ -15,13 +15,14 @@ public class AppConfig {
 
     @Bean
     ConcurrentKafkaListenerContainerFactory<Integer, Order> processKafkaListenerFactory(
-            ConsumerFactory<Integer,Order> consumerFactory){
+            ConsumerFactory<Integer,Order> consumerFactory, RebalanceListener rebalanceListener){
 
        var factory = new ConcurrentKafkaListenerContainerFactory<Integer,Order>();
        factory.setConsumerFactory(consumerFactory);
        factory.setBatchListener(true);
       // factory.getContainerProperties().setAckMode();
        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+       factory.getContainerProperties().setConsumerRebalanceListener(rebalanceListener);
        return factory;
     }
 }
