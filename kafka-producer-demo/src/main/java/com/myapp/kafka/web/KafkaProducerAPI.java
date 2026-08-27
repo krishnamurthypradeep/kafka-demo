@@ -31,4 +31,38 @@ public class KafkaProducerAPI {
 
             .thenApply(ignored -> ResponseEntity.ok("Orders acknowledged"));
     }
+
+    @PostMapping("compression")
+    public CompletableFuture<ResponseEntity<String>> processOrdersCompression(){
+
+
+        return orderEventProducer.testInFlightAndCompression()
+
+                .handleAsync((ignored,exception) ->{
+                    if (exception != null) {
+                        return ResponseEntity
+                                .status(503)
+                                .body("Order Sending failed: "
+                                        + exception.getMessage());
+                    }
+                    return ResponseEntity.ok("Orders acknowledged");
+                });
+    }
+
+    @PostMapping("idempotence")
+    public CompletableFuture<ResponseEntity<String>> processOrdersIdempotence(){
+
+
+        return orderEventProducer.testIdempotence()
+
+                .handleAsync((ignored,exception) ->{
+                    if (exception != null) {
+                        return ResponseEntity
+                                .status(503)
+                                .body("Order Sending failed: "
+                                        + exception.getMessage());
+                    }
+                    return ResponseEntity.ok("Orders acknowledged");
+                });
+    }
 }

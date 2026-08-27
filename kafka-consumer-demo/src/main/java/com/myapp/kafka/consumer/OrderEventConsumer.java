@@ -20,7 +20,7 @@ public class OrderEventConsumer {
     private static final Logger logger = LoggerFactory.getLogger(OrderEventConsumer.class);
     private final AtomicInteger invocation = new AtomicInteger();
     @KafkaListener(
-    topics = {"orders-topic","payments"},
+    topics = {"orders-idempotence-topic"},
     containerFactory = "processKafkaListenerFactory")
     public void processOrders(List<ConsumerRecord<Integer,Order>> orders,
                               Acknowledgment acknowledgment){
@@ -44,3 +44,11 @@ public class OrderEventConsumer {
     }
 
 }
+
+// enable.idempotence works with only acks=all
+// acks
+// batch.size
+// linger.ms
+// compression.type (gzip (Better Compression),lz4 and snappy)
+
+// max.in.flight.request.per.connection: 1

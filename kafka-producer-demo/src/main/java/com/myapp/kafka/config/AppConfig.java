@@ -1,6 +1,7 @@
 package com.myapp.kafka.config;
 
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.common.config.TopicConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,12 +23,13 @@ public class AppConfig {
 
     @Bean
     NewTopic orderTopic(){
-        return TopicBuilder.name(topicName).partitions(partitions).replicas(replicas).build();
+        return TopicBuilder.name(topicName).partitions(partitions).replicas(replicas)
+                .config(TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG,"2").build();
     }
 
-    @Bean
-    NewTopic paymentsTopic(){
-        return TopicBuilder.name("payments").partitions(3).replicas(3).build();
-    }
+//    @Bean
+//    NewTopic paymentsTopic(){
+//        return TopicBuilder.name("payments").partitions(3).replicas(3).build();
+//    }
 
 }

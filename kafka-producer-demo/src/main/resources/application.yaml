@@ -7,22 +7,24 @@ spring:
       - localhost:19093
       - localhost:19094
     template:
-      default-topic: orders-topic
+      default-topic: ${app.kafka.topic.orders}
     producer:
       key-serializer: org.apache.kafka.common.serialization.IntegerSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
       client-id: spring-boot-producer
       acks: all
-      retries: 3
+      retries: 10
       properties:
-        #
+        # prevent duplicates
         enable.idempotence: true
         retry.backof.ms: 1000
-        linger.ms: 100
+        max.in.flight.requests.per.connection: 1
+        compression.type: lz4
+        linger.ms: 0
         buffer.memory: 67108864
-        request.timeout.ms: 10
-        delivery.timeout.ms: 100
-        retries.backoff.ms: 5
+        request.timeout.ms: 5000
+        delivery.timeout.ms: 30000
+        retry.backoff.ms: 5
 
       batch-size: 131072
 
@@ -30,9 +32,14 @@ spring:
 app:
   kafka:
     topic:
-      orders: orders-topic
-      partitions: 3
+      orders: orders-producer-config-topic
+      partitions: 1
       replicas: 3
 
 server:
   port: 8888
+
+logging:
+  level:
+    org.apache.kafka.clients.producer: debug
+    org.springframework.kafka: info
