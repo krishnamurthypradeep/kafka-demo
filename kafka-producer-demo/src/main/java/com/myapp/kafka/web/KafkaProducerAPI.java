@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("api/v1/orders")
@@ -23,9 +24,11 @@ public class KafkaProducerAPI {
     }
 
     @PostMapping
-    public ResponseEntity<?> processOrders(@RequestBody List<Order> orders){
-        orderEventProducer.publishASynchronously(orders);
-    return ResponseEntity.accepted().body(Map.of("message","Orders Submitted To Kafka",
-            "numberOfOrders",orders.size()));
+    public CompletableFuture<ResponseEntity<String>> processOrders(@RequestBody List<Order> orders){
+
+
+    return orderEventProducer.publishASynchronouslyWithBatch(orders)
+
+            .thenApply(ignored -> ResponseEntity.ok("Orders acknowledged"));
     }
 }

@@ -76,6 +76,54 @@ public class OrderEventProducer {
         } );
     }
 
+    public CompletableFuture<Void> publishASynchronouslyWithBatch(List<Order> orders){
+
+        List<CompletableFuture<?>> sends =
+                orders.stream()
+                        .map(order -> {
+                            try {
+                                String json = objectMapper.writeValueAsString(order);
+
+                                long queuedAt = System.nanoTime();
+
+                                return kafkaTemplate
+                                        .sendDefault(order.orderId(), json)
+                                        .whenComplete((result, exception) -> {
+                                            long completedAt = System.nanoTime();
+
+                                            double durationMs =
+                                                    (completedAt - queuedAt)
+                                                            / 1_000_000.0;
+
+                                            if (exception != null) {
+                                                System.err.printf(
+                                                        "orderId=%d failed after %.2f ms: %s%n",
+                                                        order.orderId(),
+                                                        durationMs,
+                                                        exception.getMessage());
+                                                return;
+                                            }
+
+                                            System.out.printf(
+                                                    "orderId=%d partition=%d " +
+                                                            "offset=%d acknowledged after %.2f ms%n",
+                                                    order.orderId(),
+                                                    result.getRecordMetadata()
+                                                            .partition(),
+                                                    result.getRecordMetadata()
+                                                            .offset(),
+                                                    durationMs);
+                                        });
+
+                            } catch (Exception exception) {
+                                return CompletableFuture.failedFuture(exception);
+                            }
+                        }).toList();
+
+        return CompletableFuture.allOf(
+                sends.toArray(CompletableFuture[]::new));
+    }
+
 
 
 }
