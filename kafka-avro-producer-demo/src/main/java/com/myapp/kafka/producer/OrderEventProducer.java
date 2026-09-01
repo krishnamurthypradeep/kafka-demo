@@ -1,110 +1,115 @@
 package com.myapp.kafka.producer;
 
 import com.myapp.kafka.domain.Order;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.errors.RetriableException;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
+import java.util.stream.Collectors;
 
-//import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 @Component
 public class OrderEventProducer {
 
-    private KafkaTemplate<String,Order> kafkaTemplate;
+    private final KafkaTemplate<String, Order> kafkaTemplate;
 
-    private ObjectMapper objectMapper;
-
-
-    public OrderEventProducer(KafkaTemplate<String, Order> kafkaTemplate, ObjectMapper objectMapper) {
+    public OrderEventProducer(
+            KafkaTemplate<String, Order> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
-        this.objectMapper = objectMapper;
-       // this.objectMapper.registeredModules(new JavaTimeModule());
     }
 
+    public CompletableFuture<?> publishAsynchronouslyWithBatch(
+            List<Order> orders) {
 
+        List<CompletableFuture<?>> sends = orders.stream()
+                .map(this::sendOrder).collect(Collectors.toUnmodifiableList());
 
-
-
-
-    public CompletableFuture<Void> publishASynchronouslyWithBatch(List<Order> orders){
-
-        List<CompletableFuture<?>> sends =
-                orders.stream()
-                        .map(order -> {
-                            try {
-
-
-                                long queuedAt = System.nanoTime();
-
-                                return kafkaTemplate
-                                        .sendDefault(order.getOrderId().toString(), order)
-                                        .whenComplete((result, exception) -> {
-                                            long completedAt = System.nanoTime();
-                                            long startedAt = System.nanoTime();
-                                            double durationMs =
-                                                    (completedAt - queuedAt)
-                                                            / 1_000_000.0;
-
-                                            if (exception != null) {
-                                                Throwable rootCause = getRootCause(exception);
-                                                double durationMS = elapsedMilliseconds(startedAt);
-
-
-                                                if (rootCause instanceof RetriableException) {
-                                                    /*
-                                                     * The failure was retriable, but Kafka could not complete
-                                                     * the send within retries/delivery.timeout.ms.
-                                                     */
-                                                    System.err.printf(
-                                                            "%s RETRIES EXHAUSTED: orderId=%d, " +
-                                                                    "duration=%.2f ms, exception=%s, message=%s%n",
-                                                            "BATCH",
-                                                            order.getOrderId(),
-                                                            durationMs,
-                                                            rootCause.getClass().getSimpleName(),
-                                                            rootCause.getMessage());
-                                                } else {
-                                                    /*
-                                                     * Examples include serialization errors,
-                                                     * invalid topic names and oversized messages.
-                                                     */
-                                                    System.err.printf(
-                                                            "%s NON-RETRIABLE/FINAL FAILURE: orderId=%d, " +
-                                                                    "duration=%.2f ms, exception=%s, message=%s%n",
-                                                            "BATCH",
-                                                            order.getOrderId(),
-                                                            durationMs,
-                                                            rootCause.getClass().getSimpleName(),
-                                                            rootCause.getMessage());
-                                                }
-                                                return;
-                                            }
-
-                                            System.out.printf(
-                                                    "orderId=%d partition=%d " +
-                                                            "offset=%d acknowledged after %.2f ms%n",
-                                                    order.getOrderId(),
-                                                    result.getRecordMetadata()
-                                                            .partition(),
-                                                    result.getRecordMetadata()
-                                                            .offset(),
-                                                    durationMs);
-                                        });
-
-                            } catch (Exception exception) {
-                                return CompletableFuture.failedFuture(exception);
-                            }
-                        }).toList();
 
         return CompletableFuture.allOf(
                 sends.toArray(CompletableFuture[]::new));
+    }
+
+    private CompletableFuture<?> sendOrder(Order order) {
+
+        /*
+         * Capture the start time before invoking KafkaTemplate.send().
+         */
+        long startedAt = System.nanoTime();
+
+        try {
+            return kafkaTemplate
+                    .sendDefault(
+                            order.getOrderId().toString(),
+                            order)
+                    .whenComplete((result, exception) -> {
+
+                        double durationMs =
+                                elapsedMilliseconds(startedAt);
+
+                        if (exception != null) {
+                            logFailure(
+                                    order,
+                                    exception,
+                                    durationMs);
+                            return;
+                        }
+
+                        System.out.printf(
+                                "ACKNOWLEDGED: orderId=%d, " +
+                                        "topic=%s, partition=%d, " +
+                                        "offset=%d, duration=%.2f ms%n",
+                                Integer.valueOf(order.getOrderId().toString()),
+                                result.getRecordMetadata().topic(),
+                                result.getRecordMetadata().partition(),
+                                result.getRecordMetadata().offset(),
+                                durationMs);
+                    });
+
+        } catch (Exception exception) {
+            /*
+             * Handles failures thrown before a future is returned,
+             * such as an immediate serialization/configuration error.
+             */
+            double durationMs =
+                    elapsedMilliseconds(startedAt);
+
+            logFailure(order, exception, durationMs);
+
+            return CompletableFuture.failedFuture(exception);
+        }
+    }
+
+    private void logFailure(
+            Order order,
+            Throwable exception,
+            double durationMs) {
+
+        Throwable rootCause = getRootCause(exception);
+
+        if (rootCause instanceof RetriableException) {
+            /*
+             * Kafka normally retries this type of error internally.
+             * Receiving it here means retries or delivery timeout
+             * were exhausted.
+             */
+            System.err.printf(
+                    "RETRIES EXHAUSTED: orderId=%d, " +
+                            "duration=%.2f ms, exception=%s, " +
+                            "message=%s%n",
+                    order.getOrderId(),
+                    durationMs,
+                    rootCause.getClass().getSimpleName(),
+                    rootCause.getMessage());
+        } else {
+            System.err.printf(
+                    "NON-RETRIABLE/FINAL FAILURE: orderId=%s, " +
+                            "duration=%.2f ms, exception=%s, message=%s%n",
+                    order.getOrderId(),
+                    durationMs,
+                    rootCause.getClass().getSimpleName(),
+                    rootCause.getMessage());
+        }
     }
 
     private Throwable getRootCause(Throwable exception) {
@@ -121,32 +126,41 @@ public class OrderEventProducer {
         return (System.nanoTime() - startedAt) / 1_000_000.0;
     }
 
-
-
     public void printIdempotenceMetrics() {
-        kafkaTemplate.metrics().forEach((name, metric) -> {
-            if (name.name().equals("record-send-total")
-                    || name.name().equals("record-retry-total")
-                    || name.name().equals("record-error-total")) {
 
+        kafkaTemplate.metrics().forEach((metricName, metric) -> {
+
+            boolean requiredMetric =
+                    metricName.name().equals("record-send-total")
+                            || metricName.name()
+                            .equals("record-retry-total")
+                            || metricName.name()
+                            .equals("record-error-total");
+
+            if (requiredMetric) {
                 System.out.printf(
-                        "%s = %s%n",
-                        name.name(),
+                        "%s %s = %s%n",
+                        metricName.name(),
+                        metricName.tags(),
                         metric.metricValue());
             }
         });
     }
 
-    private void printProducerMetrics(String topic) {
+    public void printProducerMetrics(String topic) {
 
         kafkaTemplate.metrics().forEach((metricName, metric) -> {
 
             boolean requiredMetric =
                     metricName.name().equals("compression-rate-avg")
-                            || metricName.name().equals("record-send-total")
-                            || metricName.name().equals("record-retry-total")
-                            || metricName.name().equals("request-size-avg")
-                            || metricName.name().equals("request-size-max");
+                            || metricName.name()
+                            .equals("record-send-total")
+                            || metricName.name()
+                            .equals("record-retry-total")
+                            || metricName.name()
+                            .equals("request-size-avg")
+                            || metricName.name()
+                            .equals("request-size-max");
 
             if (!requiredMetric) {
                 return;
@@ -156,8 +170,7 @@ public class OrderEventProducer {
                     metricName.tags().get("topic");
 
             /*
-             * Some producer metrics have a topic tag, while aggregate
-             * producer metrics do not.
+             * Aggregate metrics do not contain a topic tag.
              */
             if (metricTopic == null || metricTopic.equals(topic)) {
                 System.out.printf(
@@ -168,8 +181,4 @@ public class OrderEventProducer {
             }
         });
     }
-
-
-
-
 }

@@ -3,18 +3,35 @@
   "name": "Order",
   "namespace": "com.myapp.kafka.domain",
   "fields": [
-    { "name": "orderId", "type": "string" },
-    { "name": "customerId", "type": "string" },
+    {
+      "name": "orderId",
+      "type": "string"
+    },
+    {
+      "name": "customerId",
+      "type": "string"
+    },
     {
       "name": "orderType",
       "type": {
         "type": "enum",
         "name": "OrderType",
-        "symbols": ["ONLINE", "IN_STORE", "WHOLESALE"]
+        "symbols": [
+          "ONLINE",
+          "IN_STORE",
+          "WHOLESALE"
+        ],
+        "default": "ONLINE"
       }
     },
-    { "name": "orderTime", "type": "long" },
-    { "name": "totalAmount", "type": "double" },
+    {
+      "name": "orderTime",
+      "type": "long"
+    },
+    {
+      "name": "totalAmount",
+      "type": "double"
+    },
     {
       "name": "lineItems",
       "type": {
@@ -23,12 +40,25 @@
           "type": "record",
           "name": "OrderLineItem",
           "fields": [
-            { "name": "productId", "type": "string" },
-            { "name": "productName", "type": "string" },
-            { "name": "quantity", "type": "int" },
-            { "name": "unitPrice", "type": "double" }
+            {
+              "name": "productId",
+              "type": "string"
+            },
+            {
+              "name": "productName",
+              "type": "string"
+            },
+            {
+              "name": "quantity",
+              "type": "int"
+            },
+            {
+              "name": "unitPrice",
+              "type": "double"
+            }
           ]
-        }
+        },
+        "default": []
       }
     }
   ]

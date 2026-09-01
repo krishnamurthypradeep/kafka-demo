@@ -7,7 +7,7 @@ package com.myapp.kafka.domain;
 @org.apache.avro.specific.AvroGenerated
 public enum OrderType implements org.apache.avro.generic.GenericEnumSymbol<OrderType> {
   ONLINE, IN_STORE, WHOLESALE  ;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"enum\",\"name\":\"OrderType\",\"namespace\":\"com.myapp.kafka.domain\",\"symbols\":[\"ONLINE\",\"IN_STORE\",\"WHOLESALE\"]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"enum\",\"name\":\"OrderType\",\"namespace\":\"com.myapp.kafka.domain\",\"symbols\":[\"ONLINE\",\"IN_STORE\",\"WHOLESALE\"],\"default\":\"ONLINE\"}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   @Override
