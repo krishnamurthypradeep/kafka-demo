@@ -20,7 +20,7 @@ public class OrderEventConsumer {
     private static final Logger logger = LoggerFactory.getLogger(OrderEventConsumer.class);
     private final AtomicInteger invocation = new AtomicInteger();
     @KafkaListener(
-    topics = {"orders-idempotence-topic"},
+    topics = {"orders-avro-topic"},
     containerFactory = "processKafkaListenerFactory")
     public void processOrders(List<ConsumerRecord<Integer,Order>> orders,
                               Acknowledgment acknowledgment){

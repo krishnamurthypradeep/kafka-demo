@@ -1,0 +1,18 @@
+[
+  {
+    "orderId": 501,
+    "locationId": "BLR-01",
+    "finalAmount": 1250.00,
+    "orderType": "GENERAL",
+    "orderLineItems": [],
+    "orderedDateTime": "2026-08-26T17:00:00"
+  },
+  {
+    "orderId": 502,
+    "locationId": "BLR-02",
+    "finalAmount": 2450.00,
+    "orderType": "RESTAURANT",
+    "orderLineItems": [],
+    "orderedDateTime": "2026-08-26T17:01:00"
+  }
+]

@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: kafka-consumer-demo
+  kafka:
+    bootstrap-servers:
+      - localhost:19092
+      - localhost:19093
+      - localhost:19094
+    template:
+      default-topic: ${app.kafka.topic.orders}
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.apicurio.registry.serde.avro.AvroKafkaDeserializer
+      client-id: spring-boot-producer
+
+      properties:
+        apicurio.registry.url: ${SCHEMA_REGISTRY_URL:http://localhost:8081/apis/registry/v3}
+        apicurio.registry.use-specific-avro-reader: true
+        # prevent duplicates
+        group.id: order-avro-consumer-group
+        auto.offset.reset: earliest
+        enable.auto.commit: false
+
+
+
+
+
+
+
+server:
+  port: 8881
+
+logging:
+  level:
+    org.apache.kafka.clients.producer: debug
+    org.springframework.kafka: info
