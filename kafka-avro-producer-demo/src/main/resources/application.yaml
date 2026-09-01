@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: kafka-producer-demo
+  kafka:
+    bootstrap-servers:
+      - localhost:19092
+      - localhost:19093
+      - localhost:19094
+    template:
+      default-topic: ${app.kafka.topic.orders}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      client-id: spring-boot-producer
+      acks: all
+      retries: 10
+      properties:
+        "[schema.registry.url]": http://localhost:8081
+        # prevent duplicates
+        enable.idempotence: true
+        retry.backof.ms: 1000
+        max.in.flight.requests.per.connection: 1
+        compression.type: lz4
+        linger.ms: 0
+        buffer.memory: 67108864
+        request.timeout.ms: 5000
+        delivery.timeout.ms: 30000
+        retry.backoff.ms: 5
+
+      batch-size: 131072
+
+
+app:
+  kafka:
+    topic:
+      orders: orders-producer-config-topic
+      partitions: 1
+      replicas: 3
+
+server:
+  port: 8888
+
+logging:
+  level:
+    org.apache.kafka.clients.producer: debug
+    org.springframework.kafka: info

@@ -1,0 +1,35 @@
+{
+  "type": "record",
+  "name": "Order",
+  "namespace": "com.myapp.kafka.domain",
+  "fields": [
+    { "name": "orderId", "type": "string" },
+    { "name": "customerId", "type": "string" },
+    {
+      "name": "orderType",
+      "type": {
+        "type": "enum",
+        "name": "OrderType",
+        "symbols": ["ONLINE", "IN_STORE", "WHOLESALE"]
+      }
+    },
+    { "name": "orderTime", "type": "long" },
+    { "name": "totalAmount", "type": "double" },
+    {
+      "name": "lineItems",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "OrderLineItem",
+          "fields": [
+            { "name": "productId", "type": "string" },
+            { "name": "productName", "type": "string" },
+            { "name": "quantity", "type": "int" },
+            { "name": "unitPrice", "type": "double" }
+          ]
+        }
+      }
+    }
+  ]
+}

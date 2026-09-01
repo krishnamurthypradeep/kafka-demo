@@ -7,12 +7,14 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="kafka-consumer-demo" />
+        <module name="kafka-avro-producer-demo" />
         <module name="kafka-producer-demo" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="kafka-avro-producer-demo" options="-parameters" />
       <module name="kafka-consumer-demo" options="-parameters" />
       <module name="kafka-producer-demo" options="-parameters" />
     </option>
